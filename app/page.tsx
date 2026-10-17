@@ -8,90 +8,43 @@ import MicroNeedleWidget from '@/components/subscriptions/widgets/MicroNeedleWid
 import GlassCapsuleWidget from '@/components/subscriptions/widgets/GlassCapsuleWidget';
 import SubscriptionModal from '@/components/subscriptions/SubscriptionModal';
 import GlobalConsumptionOverlay from '@/components/subscriptions/GlobalConsumptionOverlay';
-import { DEFAULT_SUBSCRIPTIONS } from '@/lib/initialSubscriptions';
+import { useSubscriptions } from '@/lib/subscriptionStore';
 import { AISubscription } from '@/types/subscriptions';
 import { Plus, RotateCcw, Activity, Layers } from 'lucide-react';
 
 export default function Page() {
-  // Subscriptions State with LocalStorage persistence via lazy initializer
-  const [subscriptions, setSubscriptions] = useState<AISubscription[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('ai_subscriptions_vault');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            return parsed;
-          }
-        }
-      } catch {}
-    }
-    return DEFAULT_SUBSCRIPTIONS;
-  });
+  // SSR-Safe Subscription Store powered by useSyncExternalStore (eliminates hydration mismatches)
+  const [subscriptions, store] = useSubscriptions();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMatrixOpen, setIsMatrixOpen] = useState(false);
   const [showCornerStack, setShowCornerStack] = useState(false);
   const [selectedSubForEdit, setSelectedSubForEdit] = useState<AISubscription | null>(null);
 
-  // Save subscriptions to localStorage
-  const saveSubscriptions = useCallback((newSubs: AISubscription[]) => {
-    setSubscriptions(newSubs);
-    try {
-      localStorage.setItem('ai_subscriptions_vault', JSON.stringify(newSubs));
-    } catch {}
-  }, []);
-
   const handleUpdateRemaining = useCallback((id: string, newRemaining: number) => {
-    setSubscriptions((prev) => {
-      const updated = prev.map((s) => (s.id === id ? { ...s, remaining: newRemaining } : s));
-      try {
-        localStorage.setItem('ai_subscriptions_vault', JSON.stringify(updated));
-      } catch {}
-      return updated;
-    });
-  }, []);
+    store.updateRemaining(id, newRemaining);
+  }, [store]);
 
   const handleResetSubscription = useCallback((id: string) => {
-    setSubscriptions((prev) => {
-      const updated = prev.map((s) => (s.id === id ? { ...s, remaining: s.totalAllowance } : s));
-      try {
-        localStorage.setItem('ai_subscriptions_vault', JSON.stringify(updated));
-      } catch {}
-      return updated;
-    });
-  }, []);
+    store.reset(id);
+  }, [store]);
 
   const handleResetAll = useCallback(() => {
-    setSubscriptions((prev) => {
-      const updated = prev.map((s) => ({ ...s, remaining: s.totalAllowance }));
-      try {
-        localStorage.setItem('ai_subscriptions_vault', JSON.stringify(updated));
-      } catch {}
-      return updated;
-    });
-  }, []);
+    store.resetAll();
+  }, [store]);
 
   const handleSaveSubscription = useCallback(
     (sub: AISubscription) => {
-      const exists = subscriptions.some((s) => s.id === sub.id);
-      let updated: AISubscription[];
-      if (exists) {
-        updated = subscriptions.map((s) => (s.id === sub.id ? sub : s));
-      } else {
-        updated = [sub, ...subscriptions];
-      }
-      saveSubscriptions(updated);
+      store.upsert(sub);
     },
-    [subscriptions, saveSubscriptions]
+    [store]
   );
 
   const handleDeleteSubscription = useCallback(
     (id: string) => {
-      const updated = subscriptions.filter((s) => s.id !== id);
-      saveSubscriptions(updated);
+      store.delete(id);
     },
-    [subscriptions, saveSubscriptions]
+    [store]
   );
 
   return (
@@ -157,7 +110,7 @@ export default function Page() {
           </button>
 
           <button
-            onClick={() => setSubscriptions(DEFAULT_SUBSCRIPTIONS)}
+            onClick={() => store.restoreDefaults()}
             title="Reset default subscriptions"
             className="p-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 text-xs rounded-lg transition-colors"
           >
