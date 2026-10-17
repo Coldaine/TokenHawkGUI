@@ -8,26 +8,60 @@ import MicroNeedleWidget from '@/components/subscriptions/widgets/MicroNeedleWid
 import GlassCapsuleWidget from '@/components/subscriptions/widgets/GlassCapsuleWidget';
 import SubscriptionModal from '@/components/subscriptions/SubscriptionModal';
 import GlobalConsumptionOverlay from '@/components/subscriptions/GlobalConsumptionOverlay';
+import QuotaWindowsStudy from '@/components/tokenhawk/QuotaWindowsStudy';
+import DollarBalancesStudy from '@/components/tokenhawk/DollarBalancesStudy';
+import RotationMotionStudy from '@/components/tokenhawk/RotationMotionStudy';
+import ServiceAdapterAndQmlView from '@/components/tokenhawk/ServiceAdapterAndQmlView';
 import { useSubscriptions } from '@/lib/subscriptionStore';
 import { AISubscription } from '@/types/subscriptions';
-import { Plus, RotateCcw, Activity, Layers } from 'lucide-react';
+import { PrepaidTreatment } from '@/types/tokenhawk';
+import {
+  Plus,
+  RotateCcw,
+  Activity,
+  Layers,
+  Sliders,
+  DollarSign,
+  RotateCw,
+  FileCode2,
+} from 'lucide-react';
+
+type WorkbenchTab =
+  | 'equalizer'
+  | 'study_windows'
+  | 'study_dollars'
+  | 'study_rotation'
+  | 'adapter_qml';
 
 export default function Page() {
-  // SSR-Safe Subscription Store powered by useSyncExternalStore (eliminates hydration mismatches)
+  // SSR-Safe Subscription Store powered by useSyncExternalStore
   const [subscriptions, store] = useSubscriptions();
+
+  // Default to the preserved Focused Vertical Equalizer view, with top workbench tabs
+  const [activeTab, setActiveTab] = useState<WorkbenchTab>('equalizer');
+  const [preferredPrepaid, setPreferredPrepaid] =
+    useState<PrepaidTreatment>('digital_readout');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMatrixOpen, setIsMatrixOpen] = useState(false);
   const [showCornerStack, setShowCornerStack] = useState(false);
-  const [selectedSubForEdit, setSelectedSubForEdit] = useState<AISubscription | null>(null);
+  const [selectedSubForEdit, setSelectedSubForEdit] = useState<AISubscription | null>(
+    null
+  );
 
-  const handleUpdateRemaining = useCallback((id: string, newRemaining: number) => {
-    store.updateRemaining(id, newRemaining);
-  }, [store]);
+  const handleUpdateRemaining = useCallback(
+    (id: string, newRemaining: number) => {
+      store.updateRemaining(id, newRemaining);
+    },
+    [store]
+  );
 
-  const handleResetSubscription = useCallback((id: string) => {
-    store.reset(id);
-  }, [store]);
+  const handleResetSubscription = useCallback(
+    (id: string) => {
+      store.reset(id);
+    },
+    [store]
+  );
 
   const handleResetAll = useCallback(() => {
     store.resetAll();
@@ -47,12 +81,50 @@ export default function Page() {
     [store]
   );
 
+  const workbenchTabs: Array<{
+    id: WorkbenchTab;
+    label: string;
+    shortLabel: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }> = [
+    {
+      id: 'equalizer',
+      label: 'Focused Equalizer (Default)',
+      shortLabel: 'Equalizer',
+      icon: Sliders,
+    },
+    {
+      id: 'study_windows',
+      label: '1. Quota Windows',
+      shortLabel: '1. Windows',
+      icon: Layers,
+    },
+    {
+      id: 'study_dollars',
+      label: '2. Dollar Balances',
+      shortLabel: '2. Dollars',
+      icon: DollarSign,
+    },
+    {
+      id: 'study_rotation',
+      label: '3. Rotation & Motion',
+      shortLabel: '3. Rotation',
+      icon: RotateCw,
+    },
+    {
+      id: 'adapter_qml',
+      label: 'Adapter & Quickshell QML',
+      shortLabel: 'QML & API',
+      icon: FileCode2,
+    },
+  ];
+
   return (
-    <main className="relative w-screen h-screen overflow-hidden bg-[#07090e] text-slate-100 font-sans select-none flex flex-col justify-between p-6 sm:p-8">
+    <main className="relative min-h-screen w-full overflow-x-hidden bg-[#07090e] text-slate-100 font-sans select-none flex flex-col justify-between p-4 sm:p-6">
       {/* Subtle minimalist ambient grid background */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(118,185,0,0.07),rgba(255,255,255,0))] pointer-events-none" />
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(118,185,0,0.06),rgba(255,255,255,0))] pointer-events-none" />
       <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        className="fixed inset-0 opacity-[0.03] pointer-events-none"
         style={{
           backgroundImage:
             'linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)',
@@ -60,86 +132,142 @@ export default function Page() {
         }}
       />
 
-      {/* Top Header */}
-      <header className="relative z-10 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <span className="w-2.5 h-2.5 rounded-sm bg-[#76b900] shadow-[0_0_8px_#76b900]" />
-          <span className="text-sm font-semibold tracking-wider text-slate-200 uppercase font-mono">
-            AI Quota Runway
-          </span>
-          <span className="text-xs text-slate-500 font-mono hidden sm:inline">
-            · Focused Vertical Equalizer
-          </span>
-        </div>
+      {/* Top Workbench Header (3-Zone Contract: Brand Wordmark | Workbench Tabs | Context Action) */}
+      <header className="relative z-30 flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-slate-800/80">
+        {/* Zone 1: Brand Title */}
+        <button
+          type="button"
+          onClick={() => setActiveTab('equalizer')}
+          className="text-sm font-bold tracking-wider text-slate-100 uppercase font-mono whitespace-nowrap shrink-0 hover:text-[#76b900] transition-colors"
+        >
+          TokenHawk Workbench
+        </button>
 
-        <div className="flex items-center gap-2">
-          {/* Toggle Corner Stack Comparison */}
-          <button
-            onClick={() => setShowCornerStack(!showCornerStack)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-xs font-mono transition-colors ${
-              showCornerStack
-                ? 'bg-slate-800 border-[#76b900] text-[#76b900]'
-                : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">
-              {showCornerStack ? 'Hide Corner Stack' : 'Show Corner Stack (4 Styles)'}
-            </span>
-          </button>
+        {/* Zone 2: Workbench Navigation Tabs */}
+        <nav className="flex items-center gap-1 bg-[#0b0f19] border border-slate-800 rounded-xl p-1 overflow-x-auto max-w-full">
+          {workbenchTabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono transition-colors whitespace-nowrap shrink-0 ${
+                  isActive
+                    ? 'bg-[#76b900] text-slate-950 font-bold shadow-sm'
+                    : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline">{tab.label}</span>
+                <span className="lg:hidden">{tab.shortLabel}</span>
+              </button>
+            );
+          })}
+        </nav>
 
-          {/* Matrix Trigger */}
-          <button
-            onClick={() => setIsMatrixOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-300 hover:text-white text-xs rounded-lg transition-colors font-mono"
-          >
-            <Activity className="w-3.5 h-3.5 text-[#76b900]" />
-            <span className="hidden sm:inline">Radial Matrix</span>
-          </button>
+        {/* Zone 3: Context Controls for Default Equalizer View */}
+        <div className="flex items-center gap-2 shrink-0">
+          {activeTab === 'equalizer' ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setShowCornerStack(!showCornerStack)}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 border rounded-lg text-xs font-mono transition-colors whitespace-nowrap shrink-0 ${
+                  showCornerStack
+                    ? 'bg-slate-800 border-[#76b900] text-[#76b900]'
+                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span className="hidden xl:inline">
+                  {showCornerStack ? 'Hide Corner Stack' : 'Corner Stack (4)'}
+                </span>
+              </button>
 
-          {/* Add Subscription Button */}
-          <button
-            onClick={() => {
-              setSelectedSubForEdit(null);
-              setIsModalOpen(true);
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#76b900] hover:bg-[#68a400] text-slate-950 font-bold text-xs rounded-lg transition-colors font-mono"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add Tool</span>
-          </button>
+              <button
+                type="button"
+                onClick={() => setIsMatrixOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs rounded-lg transition-colors font-mono whitespace-nowrap shrink-0"
+              >
+                <Activity className="w-3.5 h-3.5 text-[#76b900]" />
+                <span className="hidden xl:inline">Matrix</span>
+              </button>
 
-          <button
-            onClick={() => store.restoreDefaults()}
-            title="Reset default subscriptions"
-            className="p-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 text-xs rounded-lg transition-colors"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedSubForEdit(null);
+                  setIsModalOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#76b900] hover:bg-[#68a400] text-slate-950 font-bold text-xs rounded-lg transition-colors font-mono whitespace-nowrap shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Tool</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => store.restoreDefaults()}
+                title="Reset default subscriptions"
+                className="p-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 text-xs rounded-lg transition-colors"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setActiveTab('study_rotation')}
+              className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-mono rounded-lg transition-colors whitespace-nowrap shrink-0"
+            >
+              Compact Rotating Widget
+            </button>
+          )}
         </div>
       </header>
 
-      {/* THE PRIMARY FOCUSED BIG VERTICAL BARS STAGE */}
-      <div className="relative z-20 w-full flex items-center justify-center my-auto">
-        <FocusedBarsStage
-          subscriptions={subscriptions}
-          onUpdateRemaining={handleUpdateRemaining}
-          onResetSubscription={handleResetSubscription}
-          onOpenEdit={(sub) => {
-            setSelectedSubForEdit(sub);
-            setIsModalOpen(true);
-          }}
-        />
+      {/* ACTIVE WORKBENCH STAGE */}
+      <div className="relative z-20 w-full flex-1 flex items-center justify-center py-4 my-auto">
+        {activeTab === 'equalizer' && (
+          <FocusedBarsStage
+            subscriptions={subscriptions}
+            onUpdateRemaining={handleUpdateRemaining}
+            onResetSubscription={handleResetSubscription}
+            onOpenEdit={(sub) => {
+              setSelectedSubForEdit(sub);
+              setIsModalOpen(true);
+            }}
+          />
+        )}
+
+        {activeTab === 'study_windows' && <QuotaWindowsStudy />}
+
+        {activeTab === 'study_dollars' && (
+          <DollarBalancesStudy
+            preferredPrepaid={preferredPrepaid}
+            onChangePreferredPrepaid={setPreferredPrepaid}
+          />
+        )}
+
+        {activeTab === 'study_rotation' && <RotationMotionStudy />}
+
+        {activeTab === 'adapter_qml' && <ServiceAdapterAndQmlView />}
       </div>
 
       {/* Bottom Footer */}
-      <footer className="relative z-10 text-[11px] font-mono text-slate-500 flex items-center justify-between">
-        <span>AI Quota Equalizer · Real-time synchronized across all views</span>
-        <span className="hidden sm:inline">Hover any bar for mouseover disclosure &amp; action buttons</span>
+      <footer className="relative z-10 pt-2 border-t border-slate-900/80 text-[11px] font-mono text-slate-500 flex flex-wrap items-center justify-between gap-2">
+        <span>
+          TokenHawkGUI · Reusable Quota Instrument Family &amp; Quickshell Handoff
+        </span>
+        <span className="hidden sm:inline">
+          Preserved Equalizer Default · 3 Visual Studies · Verified `services/ai-usage` Adapter · Isolated QML
+        </span>
       </footer>
 
-      {/* OPTIONAL CORNER STACK (When toggled) */}
-      {showCornerStack && (
+      {/* OPTIONAL CORNER STACK (When toggled on Equalizer tab) */}
+      {activeTab === 'equalizer' && showCornerStack && (
         <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3 pointer-events-auto animate-in fade-in slide-in-from-right-4 duration-200">
           <LiquidEqualizerWidget
             subscriptions={subscriptions}

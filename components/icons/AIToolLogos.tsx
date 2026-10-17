@@ -7,7 +7,7 @@ interface LogoProps {
   size?: number;
 }
 
-// Authentic SVG brand marks for major AI tools
+// Verified SVG brand marks for major AI providers & tools
 export const ClaudeLogo = ({ className = 'w-4 h-4', size = 16 }: LogoProps) => (
   <svg
     width={size}
@@ -126,15 +126,231 @@ export const GeminiLogo = ({ className = 'w-4 h-4', size = 16 }: LogoProps) => (
   </svg>
 );
 
+export const DeepSeekLogo = ({ className = 'w-4 h-4', size = 16 }: LogoProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    style={{ color: '#60a5fa' }}
+  >
+    <path d="M3 12c0-4.97 4.03-9 9-9 3.8 0 7.05 2.36 8.36 5.7L22 7v5h-5l1.6-1.6A6.5 6.5 0 0 0 12 5.5 6.5 6.5 0 1 0 18.5 12" />
+    <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+  </svg>
+);
+
+export const MistralLogo = ({ className = 'w-4 h-4', size = 16 }: LogoProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+    style={{ color: '#f97316' }}
+  >
+    <rect x="3" y="4" width="4" height="4" />
+    <rect x="17" y="4" width="4" height="4" />
+    <rect x="3" y="8" width="8" height="4" />
+    <rect x="13" y="8" width="8" height="4" />
+    <rect x="3" y="12" width="18" height="4" />
+    <rect x="3" y="16" width="4" height="4" />
+    <rect x="10" y="16" width="4" height="4" />
+    <rect x="17" y="16" width="4" height="4" />
+  </svg>
+);
+
+export const GroqLogo = ({ className = 'w-4 h-4', size = 16 }: LogoProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.4"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    style={{ color: '#f43f5e' }}
+  >
+    <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" />
+  </svg>
+);
+
+export const OpenRouterLogo = ({ className = 'w-4 h-4', size = 16 }: LogoProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    style={{ color: '#a78bfa' }}
+  >
+    <path d="M4 12h6l3-5h7" />
+    <path d="M10 12l3 5h7" />
+    <circle cx="4" cy="12" r="2" fill="currentColor" />
+    <circle cx="20" cy="7" r="2" fill="currentColor" />
+    <circle cx="20" cy="17" r="2" fill="currentColor" />
+  </svg>
+);
+
+export const BedrockLogo = ({ className = 'w-4 h-4', size = 16 }: LogoProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    style={{ color: '#fbbf24' }}
+  >
+    <polygon points="12 2 21 7 21 17 12 22 3 17 3 7 12 2" />
+    <polyline points="3 7 12 12 21 7" />
+    <line x1="12" y1="22" x2="12" y2="12" />
+  </svg>
+);
+
+export const TogetherLogo = ({ className = 'w-4 h-4', size = 16 }: LogoProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.2"
+    className={className}
+    style={{ color: '#34d399' }}
+  >
+    <circle cx="9" cy="12" r="5" />
+    <circle cx="15" cy="12" r="5" />
+  </svg>
+);
+
+export const FireworksLogo = ({ className = 'w-4 h-4', size = 16 }: LogoProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.2"
+    strokeLinecap="round"
+    className={className}
+    style={{ color: '#fb923c' }}
+  >
+    <path d="M12 2v6M12 16v6M2 12h6M16 12h6M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M4.93 19.07l4.24-4.24M14.83 9.17l4.24-4.24" />
+  </svg>
+);
+
+/**
+ * Honest Initials Fallback Badge:
+ * Unknown or custom providers get a crisp 2-letter monospaced badge,
+ * NEVER another provider's logo.
+ */
+export function InitialsFallbackLogo({
+  label,
+  size = 16,
+}: {
+  label: string;
+  size?: number;
+}) {
+  const clean = (label || 'AI').replace(/[^a-zA-Z0-9 ]/g, '').trim();
+  const words = clean.split(/\s+/).filter(Boolean);
+  const initials =
+    words.length >= 2
+      ? `${words[0][0]}${words[1][0]}`.toUpperCase()
+      : clean.slice(0, 2).toUpperCase() || 'AI';
+
+  return (
+    <span
+      className="inline-flex items-center justify-center font-mono font-bold tracking-tighter text-slate-200 bg-slate-800/90 border border-slate-600/80 rounded-[4px] select-none shrink-0"
+      style={{
+        width: `${size}px`,
+        height: `${size}px`,
+        fontSize: `${Math.max(8, Math.round(size * 0.52))}px`,
+        lineHeight: 1,
+      }}
+      title={`${label} (Initials Fallback)`}
+    >
+      {initials}
+    </span>
+  );
+}
+
+/**
+ * Verified provider icon resolver for TokenHawk instruments.
+ * Unknown providers receive an honest InitialsFallbackLogo, never a misleading brand icon.
+ */
+export function getVerifiedProviderIcon(
+  providerIdOrName: string,
+  fallbackName?: string,
+  size = 16
+) {
+  const lower = (providerIdOrName || '').toLowerCase();
+  if (lower.includes('claude') || lower.includes('anthropic')) {
+    return <ClaudeLogo size={size} />;
+  }
+  if (lower.includes('chatgpt') || lower.includes('openai')) {
+    return <OpenAILogo size={size} />;
+  }
+  if (lower.includes('cursor') || lower.includes('anysphere')) {
+    return <CursorLogo size={size} />;
+  }
+  if (lower.includes('midjourney')) {
+    return <MidjourneyLogo size={size} />;
+  }
+  if (lower.includes('perplexity')) {
+    return <PerplexityLogo size={size} />;
+  }
+  if (lower.includes('eleven')) {
+    return <ElevenLabsLogo size={size} />;
+  }
+  if (lower.includes('copilot') || lower.includes('github')) {
+    return <CopilotLogo size={size} />;
+  }
+  if (lower.includes('gemini') || lower.includes('vertex') || lower.includes('google')) {
+    return <GeminiLogo size={size} />;
+  }
+  if (lower.includes('deepseek')) {
+    return <DeepSeekLogo size={size} />;
+  }
+  if (lower.includes('mistral')) {
+    return <MistralLogo size={size} />;
+  }
+  if (lower.includes('groq')) {
+    return <GroqLogo size={size} />;
+  }
+  if (lower.includes('openrouter')) {
+    return <OpenRouterLogo size={size} />;
+  }
+  if (lower.includes('bedrock') || lower.includes('aws')) {
+    return <BedrockLogo size={size} />;
+  }
+  if (lower.includes('together')) {
+    return <TogetherLogo size={size} />;
+  }
+  if (lower.includes('fireworks')) {
+    return <FireworksLogo size={size} />;
+  }
+
+  return <InitialsFallbackLogo label={fallbackName || providerIdOrName} size={size} />;
+}
+
+/**
+ * Preserved legacy helper used by FocusedBarsStage and existing views.
+ * Upgraded to use the honest initials fallback for unrecognized tools instead of OpenAI's logo.
+ */
 export function getToolLogo(name: string, size = 16) {
-  const lower = name.toLowerCase();
-  if (lower.includes('claude')) return <ClaudeLogo size={size} />;
-  if (lower.includes('chatgpt') || lower.includes('openai')) return <OpenAILogo size={size} />;
-  if (lower.includes('cursor')) return <CursorLogo size={size} />;
-  if (lower.includes('midjourney')) return <MidjourneyLogo size={size} />;
-  if (lower.includes('perplexity')) return <PerplexityLogo size={size} />;
-  if (lower.includes('eleven')) return <ElevenLabsLogo size={size} />;
-  if (lower.includes('copilot') || lower.includes('github')) return <CopilotLogo size={size} />;
-  if (lower.includes('gemini')) return <GeminiLogo size={size} />;
-  return <OpenAILogo size={size} />;
+  return getVerifiedProviderIcon(name, name, size);
 }

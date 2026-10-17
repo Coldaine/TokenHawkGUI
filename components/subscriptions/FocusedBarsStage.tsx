@@ -118,25 +118,14 @@ export default function FocusedBarsStage({
     <div className="relative flex flex-col items-center justify-center select-none font-sans my-auto w-full max-w-4xl px-4">
       {/* Top Controls Header: Opacity Slider, Bar Scale & Accordion Pin */}
       <div className="flex flex-wrap items-center justify-between gap-3 w-full mb-3 px-1 text-xs font-mono">
-        {/* Composite Total Badge */}
+        {/* Workbench Inventory Summary (Avoids misleading arithmetic average across unrelated units) */}
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#76b900] shadow-[0_0_8px_#76b900]" />
+          <span className="w-2.5 h-2.5 rounded-sm bg-[#76b900]" />
           <span className="font-bold text-slate-100 uppercase tracking-wider">
-            Combined Runway:
-          </span>
-          <span
-            className={`font-bold tabular-nums text-sm ${
-              avgPercent > 50
-                ? 'text-[#10b981]'
-                : avgPercent > 25
-                ? 'text-amber-400'
-                : 'text-red-400'
-            }`}
-          >
-            {avgPercent}%
+            Interactive Equalizer Stage
           </span>
           <span className="text-slate-500 hidden sm:inline">
-            ({subscriptions.length} AI tools)
+            · {subscriptions.length} Demo Subscriptions (Long-Period Focus)
           </span>
         </div>
 
