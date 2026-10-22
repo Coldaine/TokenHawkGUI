@@ -4,17 +4,17 @@
 
 - **Permanent AI Studio Repository**: `TokenHawkGUI` (`https://github.com/Coldaine/TokenHawkGUI`) remains the active visual workbench and design repository written by Google AI Studio.
 - **No Automatic Two-Way Sync**: The existing ACP usage/account/quota surface (`MooseGooseConsulting/agent-control-plane`) receives UI changes via **reviewed imports of a recorded git revision** from `TokenHawkGUI`.
-- **Clean Boundary**: All portable TokenHawk presentation code lives in isolated directories (`types/tokenhawk.ts`, `lib/tokenhawk/`, `components/tokenhawk/`, `components/icons/AIToolLogos.tsx`, and `quickshell/`). Unrelated DEFT/3D showcase files (`components/ThreeStage.tsx`, `components/hud/*`, `lib/deftData.ts`) are never imported by the TokenHawk package.
+- **Clean Boundary**: All portable TokenHawk presentation code lives in isolated directories (`types/tokenhawk.ts`, `lib/tokenhawk/`, `components/tokenhawk/`, `components/icons/AIToolLogos.tsx`, and `quickshell/`). Unrelated DEFT/3D showcase files (`components/ThreeStage.tsx`, `components/hud/*`, `lib/deftData.ts`) stay outside the reviewed UI imports.
 
-TokenHawk is the UI for ACP's existing usage/account/quota functionality. This work creates no standalone application or repository. The current adapter targets WebsiteServices' `/api/quota`, `/api/quota/health` and `/api/subscriptions` contract and fixtures. Preserve that existing API, persistence/query and trust work while backend integration is reconciled; moving application source into ACP does not decide or implement a usage-backend migration.
+TokenHawk is the UI for ACP's existing usage/account/quota functionality. The current adapter targets WebsiteServices' `/api/quota`, `/api/quota/health` and `/api/subscriptions` contract and fixtures, alongside its existing persistence/query and trust work. This guide corrects the reviewed UI import destination; backend integration remains unfinished.
 
-[Compass](https://github.com/MooseGooseConsulting/agent-control-plane/blob/main/docs/compass.md) gathers and displays model information, benchmarks, personal notes and model selections for roles. TokenHawk supplies the usage/account/quota UI within ACP; it is not a separate product or application. Existing quota code under Compass does not change Compass's model-information goals.
+[Compass](https://github.com/MooseGooseConsulting/agent-control-plane/blob/main/docs/compass.md) gathers and displays model information, benchmarks, personal notes and model selections for roles. Personal usage/account/quota presentation is the TokenHawk UI within ACP.
 
 ---
 
 ## 2. Reviewed UI imports into the existing ACP usage surface
 
-Import the following web UI modules into ACP’s existing usage/account/quota surface through reviewed source revisions. The integration location remains to be reconciled with current ACP source; no standalone application, package or repository is created by this guide.
+Import the following web UI modules into ACP’s existing usage/account/quota surface through reviewed source revisions. Choose the integration location against current ACP source.
 
 | Source Path in `TokenHawkGUI` | Purpose in the existing ACP usage UI |
 | :--- | :--- |
@@ -40,7 +40,7 @@ The adapter works immediately with current `/api/quota` and `/api/quota/health` 
 
 ## 3. Native source in ACP; desktop declarations in `coldaine-configurations`
 
-The `quickshell/` directory contains the isolated Qt Quick / Quickshell implementation to import into ACP’s existing usage/account/quota UI. `coldaine-configurations` owns eventual installation declarations and enrollment, not these application sources:
+The `quickshell/` directory contains the isolated Qt Quick / Quickshell implementation to import into ACP’s existing usage/account/quota UI. `coldaine-configurations` owns eventual desktop installation declarations and enrollment:
 
 | File | Description |
 | :--- | :--- |
@@ -73,4 +73,4 @@ quickshell -p ./quickshell/shell.qml
 - **Native Desktop Behavior Not Yet Tested** *(requires live Wayland / Hyprland session)*:
   - Compositor click-through behavior outside `mask: Region` across fractional HiDPI outputs.
   - Verification that `WlrLayer.Top` remains hidden beneath `ext-session-lock-v1` (Hyprlock / swaylock).
-  - Live polling bridge into the Quickshell `FileView` / `Process` runner; the current WebsiteServices adapter is reusable contract evidence, not proof that this bridge exists. Backend integration remains to be reconciled.
+  - Live polling bridge into the Quickshell `FileView` / `Process` runner; current adapter and fixture compatibility does not establish a working bridge.
