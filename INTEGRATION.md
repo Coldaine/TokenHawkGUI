@@ -3,16 +3,20 @@
 ## 1. Repository Role & Integration Strategy
 
 - **Permanent AI Studio Repository**: `TokenHawkGUI` (`https://github.com/Coldaine/TokenHawkGUI`) remains the active visual workbench and design repository written by Google AI Studio.
-- **No Automatic Two-Way Sync**: Downstream consumers (`MooseGooseWebsiteServices` and `coldaine-configurations`) integrate changes via **reviewed imports of a recorded git revision** from `TokenHawkGUI`.
-- **Clean Boundary**: All portable TokenHawk presentation code lives in isolated directories (`types/tokenhawk.ts`, `lib/tokenhawk/`, `components/tokenhawk/`, `components/icons/AIToolLogos.tsx`, and `quickshell/`). Unrelated DEFT/3D showcase files (`components/ThreeStage.tsx`, `components/hud/*`, `lib/deftData.ts`) are never imported by the TokenHawk package.
+- **No Automatic Two-Way Sync**: The existing ACP usage/account/quota surface (`MooseGooseConsulting/agent-control-plane`) receives UI changes via **reviewed imports of a recorded git revision** from `TokenHawkGUI`.
+- **Clean Boundary**: All portable TokenHawk presentation code lives in isolated directories (`types/tokenhawk.ts`, `lib/tokenhawk/`, `components/tokenhawk/`, `components/icons/AIToolLogos.tsx`, and `quickshell/`). Unrelated DEFT/3D showcase files (`components/ThreeStage.tsx`, `components/hud/*`, `lib/deftData.ts`) stay outside the reviewed UI imports.
+
+TokenHawk is the UI for ACP's existing usage/account/quota functionality. The current adapter targets WebsiteServices' `/api/quota`, `/api/quota/health` and `/api/subscriptions` contract and fixtures, alongside its existing persistence/query and trust work. This guide corrects the reviewed UI import destination; ACP UI integration remains unfinished.
+
+[Compass](https://github.com/MooseGooseConsulting/agent-control-plane/blob/main/docs/compass.md) gathers and displays model information, benchmarks, personal notes and model selections for roles. Personal usage/account/quota presentation is the TokenHawk UI within ACP.
 
 ---
 
-## 2. What Moves into `MooseGooseWebsiteServices/services/ai-usage`
+## 2. Reviewed UI imports into the existing ACP usage surface
 
-Import the following self-contained web modules when embedding TokenHawk into `services/ai-usage`:
+Import the following web UI modules into ACP’s existing usage/account/quota surface through reviewed source revisions. Choose the integration location against current ACP source.
 
-| Source Path in `TokenHawkGUI` | Purpose in `services/ai-usage` |
+| Source Path in `TokenHawkGUI` | Purpose in the existing ACP usage UI |
 | :--- | :--- |
 | `types/tokenhawk.ts` | Normalized `QuotaInstrumentItem`, `QuotaWindowReading`, decoupled `CapacityState` + `ObservationStatus`, and `TokenHawkDisplayPreferences`. |
 | `lib/tokenhawk/designTokens.ts` | Centralized palette, slot dimensions (`68px` slot, `26×92px` housing), and spring motion presets. |
@@ -34,9 +38,9 @@ The adapter works immediately with current `/api/quota` and `/api/quota/health` 
 
 ---
 
-## 3. What Moves into `coldaine-configurations` (Quickshell / Hyprland / Omarchy)
+## 3. Native source in ACP; desktop declarations in `coldaine-configurations`
 
-The `quickshell/` directory contains the isolated Qt Quick / Quickshell implementation:
+The `quickshell/` directory contains the isolated Qt Quick / Quickshell implementation to import into ACP’s existing usage/account/quota UI. `coldaine-configurations` owns eventual desktop installation declarations and enrollment:
 
 | File | Description |
 | :--- | :--- |
@@ -69,4 +73,4 @@ quickshell -p ./quickshell/shell.qml
 - **Native Desktop Behavior Not Yet Tested** *(requires live Wayland / Hyprland session)*:
   - Compositor click-through behavior outside `mask: Region` across fractional HiDPI outputs.
   - Verification that `WlrLayer.Top` remains hidden beneath `ext-session-lock-v1` (Hyprlock / swaylock).
-  - Live polling bridge from `services/ai-usage` local daemon into the Quickshell `FileView` / `Process` runner.
+  - Live polling bridge into the Quickshell `FileView` / `Process` runner; current adapter and fixture compatibility does not establish a working bridge.
