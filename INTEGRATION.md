@@ -6,7 +6,7 @@
 - **No Automatic Two-Way Sync**: The existing ACP usage/account/quota surface (`MooseGooseConsulting/agent-control-plane`) receives UI changes via **reviewed imports of a recorded git revision** from `TokenHawkGUI`.
 - **Clean Boundary**: All portable TokenHawk presentation code lives in isolated directories (`types/tokenhawk.ts`, `lib/tokenhawk/`, `components/tokenhawk/`, `components/icons/AIToolLogos.tsx`, and `quickshell/`). Unrelated DEFT/3D showcase files (`components/ThreeStage.tsx`, `components/hud/*`, `lib/deftData.ts`) stay outside the reviewed UI imports.
 
-TokenHawk is the UI for ACP's existing usage/account/quota functionality. The current adapter targets WebsiteServices' `/api/quota`, `/api/quota/health` and `/api/subscriptions` contract and fixtures, alongside its existing persistence/query and trust work. This guide corrects the reviewed UI import destination; backend integration remains unfinished.
+TokenHawk is the UI for ACP's existing usage/account/quota functionality. The current adapter targets WebsiteServices' `/api/quota`, `/api/quota/health` and `/api/subscriptions` contract and fixtures, alongside its existing persistence/query and trust work. This guide corrects the reviewed UI import destination; ACP UI integration remains unfinished.
 
 [Compass](https://github.com/MooseGooseConsulting/agent-control-plane/blob/main/docs/compass.md) gathers and displays model information, benchmarks, personal notes and model selections for roles. Personal usage/account/quota presentation is the TokenHawk UI within ACP.
 
