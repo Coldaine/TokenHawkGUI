@@ -6,7 +6,7 @@
 - **No Automatic Two-Way Sync**: The existing ACP usage/account/quota surface (`MooseGooseConsulting/agent-control-plane`) receives UI changes via **reviewed imports of a recorded git revision** from `TokenHawkGUI`.
 - **Clean Boundary**: All portable TokenHawk presentation code lives in isolated directories (`types/tokenhawk.ts`, `lib/tokenhawk/`, `components/tokenhawk/`, `components/icons/AIToolLogos.tsx`, and `quickshell/`). Unrelated DEFT/3D showcase files (`components/ThreeStage.tsx`, `components/hud/*`, `lib/deftData.ts`) stay outside the reviewed UI imports.
 
-TokenHawk is the UI for ACP's existing usage/account/quota functionality. The current adapter targets WebsiteServices' `/api/quota`, `/api/quota/health` and `/api/subscriptions` contract and fixtures, alongside its existing persistence/query and trust work. This guide corrects the reviewed UI import destination; ACP UI integration remains unfinished.
+TokenHawk is the UI for ACP's existing usage/account/quota functionality. The current adapter targets the `/api/quota`, `/api/quota/health` and `/api/subscriptions` contract and fixtures now served by `MooseGooseConsulting/agent-control-plane` `packages/ai-usage`, alongside its existing persistence/query and trust work. This guide corrects the reviewed UI import destination; ACP UI integration remains unfinished.
 
 [Compass](https://github.com/MooseGooseConsulting/agent-control-plane/blob/main/docs/compass.md) gathers and displays model information, benchmarks, personal notes and model selections for roles. Personal usage/account/quota presentation is the TokenHawk UI within ACP.
 
@@ -20,7 +20,7 @@ Import the following web UI modules into ACP’s existing usage/account/quota su
 | :--- | :--- |
 | `types/tokenhawk.ts` | Normalized `QuotaInstrumentItem`, `QuotaWindowReading`, decoupled `CapacityState` + `ObservationStatus`, and `TokenHawkDisplayPreferences`. |
 | `lib/tokenhawk/designTokens.ts` | Centralized palette, slot dimensions (`68px` slot, `26×92px` housing), and spring motion presets. |
-| `lib/tokenhawk/serviceAdapter.ts` | `adaptAiUsageServiceToInstruments()` translating `/api/quota`, `/api/quota/health`, and `/api/subscriptions` without silent demo fallbacks or unfounded cap/pool inference. |
+| `lib/tokenhawk/serviceAdapter.ts` | `adaptAiUsageServiceToInstruments()` translating `/api/quota`, `/api/quota/health`, and `/api/subscriptions` — the contract served by `MooseGooseConsulting/agent-control-plane` `packages/ai-usage` — without silent demo fallbacks or unfounded cap/pool inference. |
 | `components/icons/AIToolLogos.tsx` | Verified SVG brand icons + `InitialsFallbackLogo` (`getVerifiedProviderIcon`) so unknown providers get an honest 2-letter monospaced badge. |
 | `components/tokenhawk/MeterCore.tsx` | Single-slot instrument supporting `long` (default), `stacked`, `companion`, and `short` windows plus all monetary states (`included_credit`, `prepaid_no_max` Alt A/B, `enforced_cap`, `personal_budget`, `metered_uncapped`). |
 | `components/tokenhawk/CompactRotatingWidget.tsx` | 3-slot rotating overlay component with Group, Relay, and Favorite modes, whole-assembly transitions, off-screen warning strip, and full-inventory expansion. |
@@ -31,8 +31,8 @@ Import the following web UI modules into ACP’s existing usage/account/quota su
 - `lucide-react`
 - Tailwind CSS v4 utility classes
 
-### Optional Upstream API Extensions for `services/ai-usage`
-The adapter works immediately with current `/api/quota` and `/api/quota/health` payloads. To unlock richer monetary and pool distinctions without heuristics, `services/ai-usage` can optionally include:
+### Optional Upstream API Extensions for `packages/ai-usage` (`MooseGooseConsulting/agent-control-plane`)
+The adapter works immediately with current `/api/quota` and `/api/quota/health` payloads served by `packages/ai-usage`. To unlock richer monetary and pool distinctions without heuristics, `packages/ai-usage` can optionally include:
 1. `limitKind?: 'included_credit' | 'enforced_cap' | 'personal_budget' | 'metered_uncapped'` on `/api/subscriptions` or `/api/quota` rows (otherwise dollar limits map conservatively to `'included_credit'` labeled `'LIMIT'`).
 2. `creditPoolId?: string` and `sharedKeyCount?: number` when multiple API keys draw from a single organization/account credit balance.
 
@@ -64,7 +64,7 @@ quickshell -p ./quickshell/shell.qml
 
 - **Source Implemented**:
   - Typed data model separating `capacityState` from `observationStatus`, with nullable reset timestamps and nullable companion windows.
-  - Pure `services/ai-usage` adapter (`lib/tokenhawk/serviceAdapter.ts`) with zero silent fallback.
+  - Pure `agent-control-plane` `packages/ai-usage` adapter (`lib/tokenhawk/serviceAdapter.ts`) with zero silent fallback.
   - Study 1 (`QuotaWindowsStudy`), Study 2 (`DollarBalancesStudy`), Study 3 (`RotationMotionStudy` + `CompactRotatingWidget` with 3/8/18/30 fixtures), and concrete QML files in `quickshell/`.
 - **Browser Behavior Verified**:
   - Next.js TypeScript compilation (`compile_applet`) and interactive workbench verification across Light, Dark, and Busy preview backgrounds.
