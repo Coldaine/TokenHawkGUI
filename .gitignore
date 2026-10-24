@@ -5,3 +5,6 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Standalone build output
+sidecars/swarm-lab/dist/

@@ -9,12 +9,13 @@ export interface Route {
 
 export function parseRoute(hash: string): Route {
   const raw = hash.replace(/^#\/?/, '')
-  const [path = '', query = ''] = raw.split('?')
-  const seedParam = new URLSearchParams(query).get('seed')
+  const [path = '', ...queryParts] = raw.split('?')
+  const seedParam = new URLSearchParams(queryParts.join('?')).get('seed')
   const seed = seedParam ? seedFromHex(seedParam) : DEFAULT_SEED
-  const match = /world\/(\d{1,2})/.exec(path)
-  const world = match ? Number(match[1]) : null
-  return { world: Number.isFinite(world) ? world : null, seed }
+  const match = /^world\/(\d{1,2})$/.exec(path)
+  const parsed = match ? Number(match[1]) : null
+  const world = parsed !== null && parsed >= 1 && parsed <= 12 ? parsed : null
+  return { world, seed }
 }
 
 export function routeHash(world: number | null, seed: number): string {

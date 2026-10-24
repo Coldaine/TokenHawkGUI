@@ -29,7 +29,7 @@ export class Loop {
       const cost = performance.now() - frameStart
       this.frameMs = this.frameMs * 0.9 + cost * 0.1
       this.fps = this.fps * 0.9 + (1000 / Math.max(raw, 1)) * 0.1
-      this.handle = requestAnimationFrame(tick)
+      if (this.running) this.handle = requestAnimationFrame(tick)
     }
     this.handle = requestAnimationFrame(tick)
   }
@@ -40,6 +40,7 @@ export class Loop {
   }
 
   setPaused(paused: boolean): void {
+    if (this.paused === paused) return
     this.paused = paused
     this.last = performance.now()
   }

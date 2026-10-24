@@ -12,6 +12,7 @@ export class TrailLines {
   private readonly vertices: Float32Array
   private readonly fades: Float32Array
   private readonly material: THREE.ShaderMaterial
+  private readonly initialized: Uint8Array
 
   constructor(count: number, segments = 8, color: THREE.ColorRepresentation = '#3fe0c0', opacity = 0.4) {
     this.count = count
@@ -20,6 +21,7 @@ export class TrailLines {
     this.history = new Float32Array(this.count * this.segments * 3)
     this.vertices = new Float32Array(pairs * 3)
     this.fades = new Float32Array(pairs)
+    this.initialized = new Uint8Array(count)
 
     const geometry = new THREE.BufferGeometry()
     geometry.setAttribute('position', new THREE.BufferAttribute(this.vertices, 3))
@@ -58,7 +60,8 @@ export class TrailLines {
   }
 
   update(positions: Float32Array): void {
-    const { count, segments, history, vertices, fades } = this
+    const { count, segments, history, vertices, fades, initialized } = this
+    if (positions.length < count * 3) return
     for (let i = 0; i < count; i++) {
       const base = i * segments * 3
       for (let s = segments - 1; s > 0; s--) {
@@ -71,6 +74,15 @@ export class TrailLines {
       history[base] = positions[i * 3]!
       history[base + 1] = positions[i * 3 + 1]!
       history[base + 2] = positions[i * 3 + 2]!
+      if (!initialized[i]) {
+        for (let s = 1; s < segments; s++) {
+          const offset = base + s * 3
+          history[offset] = history[base]!
+          history[offset + 1] = history[base + 1]!
+          history[offset + 2] = history[base + 2]!
+        }
+        initialized[i] = 1
+      }
     }
 
     let v = 0

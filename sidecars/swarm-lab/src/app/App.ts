@@ -221,7 +221,7 @@ export class App {
       }
     }
 
-    if (this.tourActive && this.elapsed >= this.nextTourAt) {
+    if (this.tourActive && this.mode === 'focus' && this.elapsed >= this.nextTourAt) {
       this.nextTourAt = this.elapsed + TOUR_MS / 1000
       this.advance(1)
     }
@@ -526,7 +526,7 @@ export class App {
       return
     }
 
-    if (/^[1-9]$/.test(key)) {
+    if (/^(?:[1-9]|1[0-2])$/.test(key)) {
       this.open(Number(key))
       return
     }
