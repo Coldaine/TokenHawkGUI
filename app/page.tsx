@@ -24,6 +24,7 @@ import {
   DollarSign,
   RotateCw,
   FileCode2,
+  Orbit,
 } from 'lucide-react';
 
 type WorkbenchTab =
@@ -31,7 +32,8 @@ type WorkbenchTab =
   | 'study_windows'
   | 'study_dollars'
   | 'study_rotation'
-  | 'adapter_qml';
+  | 'adapter_qml'
+  | 'swarm_lab';
 
 export default function Page() {
   // SSR-Safe Subscription Store powered by useSyncExternalStore
@@ -116,6 +118,12 @@ export default function Page() {
       label: 'Adapter & Quickshell QML',
       shortLabel: 'QML & API',
       icon: FileCode2,
+    },
+    {
+      id: 'swarm_lab',
+      label: 'Swarm Lab',
+      shortLabel: 'Swarm Lab',
+      icon: Orbit,
     },
   ];
 
@@ -254,6 +262,17 @@ export default function Page() {
         {activeTab === 'study_rotation' && <RotationMotionStudy />}
 
         {activeTab === 'adapter_qml' && <ServiceAdapterAndQmlView />}
+
+        {activeTab === 'swarm_lab' && (
+          <section className="w-full max-w-7xl overflow-hidden rounded-xl border border-slate-800 bg-[#050506]">
+            <iframe
+              title="TokenHawk Swarm Lab particle studies"
+              src="/sidecars/swarm-lab/index.html"
+              className="block h-[min(78vh,900px)] min-h-[560px] w-full"
+              allow="fullscreen"
+            />
+          </section>
+        )}
       </div>
 
       {/* Bottom Footer */}
