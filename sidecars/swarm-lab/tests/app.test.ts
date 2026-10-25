@@ -226,6 +226,24 @@ describe('keyboard ownership', () => {
     expect(window.location.hash).toContain('#/world/5')
   })
 
+  it('moves focus with the selection so Enter opens the newly selected card', async () => {
+    setReducedMotion(false)
+    app = build()
+    await wait(40)
+
+    const cards = Array.from(document.querySelectorAll<HTMLButtonElement>('.card'))
+    cards[4]!.focus()
+    cards[4]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+
+    expect(document.activeElement).toBe(cards[5])
+
+    // A browser turns Enter on a focused button into a click; the app leaves that to the button.
+    cards[5]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+    expect(window.location.hash).toBe('')
+    cards[5]!.click()
+    expect(window.location.hash).toContain('#/world/6')
+  })
+
   it('uses the selected-card shortcut when focus is outside any control', async () => {
     setReducedMotion(false)
     app = build()

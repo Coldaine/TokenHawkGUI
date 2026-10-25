@@ -146,6 +146,14 @@ export class App {
 
     this.rendered = true
     this.cards = view.cards
+    // Tabbing into the grid selects the card that received focus, so the arrow
+    // keys continue from there instead of from a stale selection.
+    view.root.addEventListener('focusin', (event) => {
+      const index = this.cards.findIndex((card) => card.el === event.target)
+      if (index < 0) return
+      this.selected = index
+      this.updateSelection()
+    })
     this.selected = Math.min(this.selected, Math.max(0, this.cards.length - 1))
     this.updateSelection()
     this.updateTourUI()
@@ -346,9 +354,15 @@ export class App {
 
   private moveSelection(delta: number): void {
     if (this.cards.length === 0) return
+    // A focused card owns Enter, so focus has to travel with the selection or
+    // Enter would open the card the visitor just arrowed away from.
+    const focusInGrid = this.cards.some((card) => card.el === document.activeElement)
     this.selected = (this.selected + delta + this.cards.length) % this.cards.length
     this.updateSelection()
-    this.cards[this.selected]?.el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    const card = this.cards[this.selected]
+    if (!card) return
+    if (focusInGrid) card.el.focus({ preventScroll: true })
+    card.el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
   }
 
   private reseed(): void {
