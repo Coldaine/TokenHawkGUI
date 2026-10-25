@@ -21,6 +21,16 @@ const nextConfig: NextConfig = {
   },
   output: 'standalone',
   transpilePackages: ['motion'],
+  // The Swarm Lab frame is sandboxed to an opaque origin, so its module script
+  // and stylesheet are CORS requests. Only that public gallery path is opened up.
+  async headers() {
+    return [
+      {
+        source: '/sidecars/swarm-lab/:path*',
+        headers: [{ key: 'Access-Control-Allow-Origin', value: '*' }],
+      },
+    ];
+  },
   webpack: (config, {dev}) => {
     // HMR is disabled in AI Studio via DISABLE_HMR env var.
     // Do not modify—file watching is disabled to prevent flickering during agent edits.

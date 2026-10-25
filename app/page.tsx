@@ -269,7 +269,10 @@ export default function Page() {
               title="TokenHawk Swarm Lab particle studies"
               src="/sidecars/swarm-lab/index.html"
               className="block h-[min(78vh,900px)] min-h-[560px] w-full"
-              allow="fullscreen"
+              /* Opaque origin: the gallery cannot read this page or its storage.
+                 Fullscreen is deliberately not granted: it cannot be verified under
+                 this sandbox here, so the frame keeps only scripts and downloads. */
+              sandbox="allow-scripts allow-downloads"
             />
           </section>
         )}
