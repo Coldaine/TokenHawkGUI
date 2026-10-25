@@ -10,6 +10,7 @@ import {
   pointsFrom,
   NOISE_GLSL,
   PARTICLE_HEADER,
+  RADIAL_MASK_GLSL,
 } from '../engine/particles'
 import { PALETTE } from '../engine/palette'
 import type { EffectDefinition, EffectRuntime } from '../engine/types'
@@ -51,6 +52,7 @@ void main() {
 `
 
 const FRAGMENT = /* glsl */ `
+${RADIAL_MASK_GLSL}
 uniform vec3 uAccent;
 uniform vec3 uHot;
 uniform float uOpacity;
@@ -61,7 +63,7 @@ void main() {
   vec2 uv = gl_PointCoord - 0.5;
   float d = length(uv);
   if (d > 0.5) discard;
-  float core = smoothstep(0.5, 0.0, d);
+  float core = radialMask(d);
   float glow = pow(core, 2.2);
   vec3 col = mix(uAccent, uHot, vMix * 0.85);
   col = mix(col, vec3(1.0), pow(core, 7.0) * 0.7);

@@ -11,6 +11,14 @@ import { DEFAULT_SEED, parseRoute, routeHash } from './routes'
 
 const VISITED_KEY = 'moosegoose.swarmlab.visited'
 const TOUR_MS = 7000
+/** Elements that own their activation keys (Enter/Space) once focused. */
+const CONTROL_SELECTOR = 'button, a[href], input, select, textarea, summary, [data-act], [role="button"]'
+
+function isControl(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return false
+  if ((target as HTMLElement).isContentEditable) return true
+  return target.closest(CONTROL_SELECTOR) !== null
+}
 
 export class App {
   private readonly stage: StageRenderer
@@ -66,11 +74,11 @@ export class App {
     this.loop.start()
 
     if (this.reduced) {
-      window.setTimeout(() => {
-        this.loop.setPaused(true)
-        this.updatePauseUI()
-        this.announce('Motion reduced. Press space to run the simulation.')
-      }, 120)
+      this.loop.setPaused(true)
+      this.updatePauseUI()
+      // A frozen loop never ticks, so draw the still frame the visitor sees.
+      this.renderOnce(0)
+      this.announce('Motion reduced. Press space to run the simulation.')
     }
   }
 
@@ -141,8 +149,10 @@ export class App {
     this.selected = Math.min(this.selected, Math.max(0, this.cards.length - 1))
     this.updateSelection()
     this.updateTourUI()
+    this.updatePauseUI()
     this.updateChrome()
     this.announce('The lab. Twelve worlds. Use the arrow keys and enter.')
+    this.settlePausedView()
   }
 
   private showFocus(effect: EffectDefinition): void {
@@ -166,11 +176,12 @@ export class App {
     this.bloom = createBloom(this.stage.renderer, window.innerWidth, window.innerHeight)
     this.bloom.setScene(runtime.scene, runtime.camera)
 
-    this.loop.setPaused(false)
+    // A world change is not a play command: keep the visitor's pause choice.
     this.updatePauseUI()
     this.updateTourUI()
     this.updateChrome()
     this.announce(`${effect.name}. World ${effect.number} of twelve.`)
+    this.settlePausedView()
   }
 
   /* ------------------------------------------------------------------ render */
@@ -215,7 +226,7 @@ export class App {
         runtime.setBudget(card.effect.cardBudget)
         runtime.update(dt, elapsed, this.pointer)
         this.stage.drawSlot(
-          { left: rect.left + 1, top: rect.top + 1, width: rect.width - 2, height: rect.height - 2 },
+          { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
           runtime,
         )
       }
@@ -236,6 +247,11 @@ export class App {
       this.snapshotWanted = false
       this.capture()
     }
+  }
+
+  /** While frozen, redraw once so a view change is a still frame, not a blank one. */
+  private settlePausedView(): void {
+    if (this.loop.isPaused) this.renderOnce(0)
   }
 
   private ensureRuntime(effect: EffectDefinition): EffectRuntime {
@@ -361,6 +377,9 @@ export class App {
     }
     this.tourActive = true
     this.nextTourAt = this.elapsed + TOUR_MS / 1000
+    // Starting a tour is an explicit request for motion, unlike a world change.
+    this.loop.setPaused(false)
+    this.updatePauseUI()
     this.updateTourUI()
     if (this.mode === 'gallery') this.advance(1)
     this.announce('Auto tour started. Any key stops it.')
@@ -393,6 +412,12 @@ export class App {
     }
   }
 
+  /** Queue a capture. A frozen loop never ticks, so paint the frame it reads. */
+  private requestSnapshot(): void {
+    this.snapshotWanted = true
+    this.settlePausedView()
+  }
+
   private capture(): void {
     try {
       const link = document.createElement('a')
@@ -414,6 +439,7 @@ export class App {
     if (this.mode === 'focus' && this.current) {
       this.ensureRuntime(this.current).resize(window.innerWidth, window.innerHeight)
     }
+    this.settlePausedView()
   }
 
   private onPointerMove = (event: PointerEvent): void => {
@@ -458,7 +484,7 @@ export class App {
         this.toggleTour()
         break
       case 'snapshot':
-        this.snapshotWanted = true
+        this.requestSnapshot()
         break
       case 'pause':
         this.togglePause()
@@ -480,6 +506,8 @@ export class App {
       return
     }
     const key = event.key
+    // Focused controls own Enter/Space; the lab shortcuts only apply outside them.
+    const controlFocused = isControl(event.target) || isControl(document.activeElement)
 
     if (this.tourActive && key.toLowerCase() !== 't') this.stopTour()
 
@@ -503,7 +531,7 @@ export class App {
       return
     }
     if (key === 's' || key === 'S') {
-      this.snapshotWanted = true
+      this.requestSnapshot()
       return
     }
     if (key === 't' || key === 'T') {
@@ -514,7 +542,7 @@ export class App {
       this.toggleFullscreen()
       return
     }
-    if (key === ' ') {
+    if (key === ' ' && !controlFocused) {
       event.preventDefault()
       this.togglePause()
       return
@@ -538,7 +566,7 @@ export class App {
       this.moveSelection(-1)
       return
     }
-    if (key === 'Enter') {
+    if (key === 'Enter' && !controlFocused) {
       const card = this.cards[this.selected]
       if (card) this.open(card.effect.number)
     }

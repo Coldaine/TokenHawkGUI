@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { describe, expect, it } from 'vitest'
-import { AgentSwarm } from '../src/sim/AgentSwarm'
+import { mulberry32 } from '../src/engine/rng'
+import { AgentSwarm, type SwarmOptions } from '../src/sim/AgentSwarm'
 
 function place(swarm: AgentSwarm, positions: Array<[number, number, number]>): void {
   positions.forEach(([x, y, z], i) => {
@@ -82,6 +83,48 @@ describe('AgentSwarm', () => {
     for (let step = 0; step < 240; step++) swarm.update(1 / 60, target, 3)
     const after = Math.hypot(swarm.positions[0]!, swarm.positions[1]!, swarm.positions[2]!)
     expect(after).toBeLessThan(before * 0.4)
+  })
+
+  it('moves equivalent arrangements identically regardless of array order', () => {
+    const options: SwarmOptions = {
+      count: 16,
+      seed: 2024,
+      bounds: 9,
+      maxSpeed: 3,
+      maxForce: 6,
+      neighborRadius: 4,
+      separationRadius: 1.4,
+      weights: { separation: 1.7, alignment: 0.9, cohesion: 0.65 },
+    }
+    const ordered = new AgentSwarm(options)
+    const reversed = new AgentSwarm({ ...options, seed: 99 })
+
+    // Give both swarms one arrangement, then reverse the array order of the second.
+    const rng = mulberry32(4242)
+    const order = Array.from({ length: options.count }, (_, i) => options.count - 1 - i)
+    order.forEach((from, to) => {
+      for (let axis = 0; axis < 3; axis++) {
+        const position = (rng() - 0.5) * 8
+        const velocity = (rng() - 0.5) * 1.2
+        ordered.positions[from * 3 + axis] = position
+        ordered.velocities[from * 3 + axis] = velocity
+        reversed.positions[to * 3 + axis] = position
+        reversed.velocities[to * 3 + axis] = velocity
+      }
+    })
+
+    const attractor = new THREE.Vector3(0.5, -0.25, 0.75)
+    for (let step = 0; step < 12; step++) {
+      ordered.update(1 / 60, attractor)
+      reversed.update(1 / 60, attractor)
+    }
+
+    order.forEach((from, to) => {
+      for (let axis = 0; axis < 3; axis++) {
+        expect(reversed.positions[to * 3 + axis]!).toBeCloseTo(ordered.positions[from * 3 + axis]!, 6)
+        expect(reversed.velocities[to * 3 + axis]!).toBeCloseTo(ordered.velocities[from * 3 + axis]!, 6)
+      }
+    })
   })
 
   it('never exceeds max speed and stays inside the world bounds', () => {

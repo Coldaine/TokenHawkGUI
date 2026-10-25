@@ -123,16 +123,21 @@ export const effect: EffectDefinition = {
     const camera = makeCamera(12)
     camera.lookAt(0, 0.4, 0)
     const attractor = new THREE.Vector3()
+    // Construction runs on the world's own clock. The app-level elapsed time
+    // starts when the page opens, so using it would hand a world opened later
+    // an already-finished build.
+    let age = 0
 
     return {
       scene,
       camera,
       particleCount: COUNT,
       update(dt, elapsed, pointer) {
+        age += dt
         uniforms.uTime!.value = elapsed
         ;(uniforms.uPointer!.value as THREE.Vector2).set(pointer.x, pointer.y)
 
-        const build = smoothstep(elapsed / 24)
+        const build = smoothstep(age / 24)
         uniforms.uBuild!.value = build
         const breathe = 1 + Math.sin(elapsed * 0.5) * 0.015
         structure.scale.setScalar((0.06 + 0.94 * build) * breathe)
@@ -162,7 +167,12 @@ export const effect: EffectDefinition = {
         applyViewport(camera, uniforms, ctx.pixelRatio, width, height)
       },
       setBudget(n) {
-        dust.geometry.setDrawRange(0, Math.max(0, Math.min(n, DUST)))
+        // The agents are always in the scene, so they spend part of the budget
+        // instead of being added on top of it.
+        const total = Math.max(0, Math.min(n, COUNT))
+        const agents = Math.min(AGENTS, total)
+        dust.geometry.setDrawRange(0, total - agents)
+        agentCloud.geometry.setDrawRange(0, agents)
       },
       dispose() {
         disposeScene(scene)

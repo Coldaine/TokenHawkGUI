@@ -38,6 +38,13 @@ export class AgentSwarm {
   readonly weights: Required<SwarmWeights>
   readonly damping: number
   private readonly rng: RNG
+  /**
+   * Snapshot of the previous step. Boids must all read the same arrangement:
+   * integrating in place would let low-index agents see updated neighbours and
+   * high-index agents see stale ones, so results would depend on array order.
+   */
+  private readonly prevPositions: Float32Array
+  private readonly prevVelocities: Float32Array
 
   constructor(options: SwarmOptions) {
     this.count = Math.max(1, Math.floor(options.count))
@@ -55,6 +62,8 @@ export class AgentSwarm {
     this.rng = mulberry32(options.seed)
     this.positions = new Float32Array(this.count * 3)
     this.velocities = new Float32Array(this.count * 3)
+    this.prevPositions = new Float32Array(this.count * 3)
+    this.prevVelocities = new Float32Array(this.count * 3)
 
     const spread = options.initialSpread ?? this.bounds
     for (let i = 0; i < this.count; i++) {
@@ -70,10 +79,15 @@ export class AgentSwarm {
 
   update(dt: number, attractor: THREE.Vector3 | null = null, seekStrength = 2.2): void {
     const { count, positions, velocities, bounds, maxSpeed, maxForce, weights } = this
+    const prevPositions = this.prevPositions
+    const prevVelocities = this.prevVelocities
     const neighborRadiusSq = this.neighborRadius * this.neighborRadius
     const separationRadiusSq = this.separationRadius * this.separationRadius
     const step = Math.min(dt, 0.05)
     const drag = Math.pow(this.damping, step * 60)
+
+    prevPositions.set(positions)
+    prevVelocities.set(velocities)
 
     for (let i = 0; i < count; i++) {
       const ix = i * 3
@@ -98,19 +112,19 @@ export class AgentSwarm {
       for (let j = 0; j < count; j++) {
         if (j === i) continue
         const jx = j * 3
-        const dx = positions[jx]! - px
-        const dy = positions[jx + 1]! - py
-        const dz = positions[jx + 2]! - pz
+        const dx = prevPositions[jx]! - px
+        const dy = prevPositions[jx + 1]! - py
+        const dz = prevPositions[jx + 2]! - pz
         const d2 = dx * dx + dy * dy + dz * dz
         if (d2 > neighborRadiusSq || d2 < 1e-8) continue
 
         neighbours += 1
-        alignX += velocities[jx]!
-        alignY += velocities[jx + 1]!
-        alignZ += velocities[jx + 2]!
-        cohX += positions[jx]!
-        cohY += positions[jx + 1]!
-        cohZ += positions[jx + 2]!
+        alignX += prevVelocities[jx]!
+        alignY += prevVelocities[jx + 1]!
+        alignZ += prevVelocities[jx + 2]!
+        cohX += prevPositions[jx]!
+        cohY += prevPositions[jx + 1]!
+        cohZ += prevPositions[jx + 2]!
 
         if (d2 < separationRadiusSq) {
           const inv = 1 / d2

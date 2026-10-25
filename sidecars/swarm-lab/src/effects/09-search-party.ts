@@ -18,6 +18,7 @@ import type { EffectDefinition, EffectRuntime } from '../engine/types'
 
 const DUST = 12000
 const AGENTS = 120
+const COUNT = DUST + AGENTS
 const PROBE_COUNT = 5
 const SWITCH_EVERY = 4
 
@@ -56,7 +57,7 @@ export const effect: EffectDefinition = {
   category: 'agents / convergence',
   blurb: 'Agents fan out across probes, compare, and collapse onto the best answer.',
   accent: PALETTE.teal,
-  count: DUST,
+  count: COUNT,
   cardBudget: 4000,
   create(ctx): EffectRuntime {
     const rng = mulberry32(hashSeed(ctx.seed ^ 0x09a11e))
@@ -171,7 +172,7 @@ export const effect: EffectDefinition = {
     return {
       scene,
       camera,
-      particleCount: DUST,
+      particleCount: COUNT,
       update(dt, elapsed, pointer) {
         dustUniforms.uTime!.value = elapsed
         agentUniforms.uTime!.value = elapsed
@@ -219,8 +220,12 @@ export const effect: EffectDefinition = {
         applyViewport(camera, agentUniforms, ctx.pixelRatio, width, height)
       },
       setBudget(n) {
-        dustCloud.geometry.setDrawRange(0, Math.max(0, Math.min(n, DUST)))
-        agentCloud.geometry.setDrawRange(0, AGENTS)
+        // Agent heads are always drawn, so the budget is split rather than
+        // spent on dust alone and topped up with the party.
+        const total = Math.max(0, Math.min(n, COUNT))
+        const agents = Math.min(AGENTS, total)
+        dustCloud.geometry.setDrawRange(0, total - agents)
+        agentCloud.geometry.setDrawRange(0, agents)
       },
       dispose() {
         disposeScene(scene)

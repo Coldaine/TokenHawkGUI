@@ -42,8 +42,20 @@ float softSize(float viewZ) {
 }
 `
 
+/**
+ * Round-sprite falloff shared by every glowing point. GLSL leaves smoothstep
+ * undefined when its edges descend; the earlier falloff passed the centre
+ * radius then zero, which rendered as hard-edged dots on some drivers.
+ */
+export const RADIAL_MASK_GLSL = /* glsl */ `
+float radialMask(float dist) {
+  return 1.0 - smoothstep(0.0, 0.5, dist);
+}
+`
+
 /** Soft additive dot with a white-hot core. */
 export const GLOW_FRAGMENT = /* glsl */ `
+${RADIAL_MASK_GLSL}
 uniform vec3 uAccent;
 uniform float uOpacity;
 varying float vAlpha;
@@ -53,7 +65,7 @@ void main() {
   vec2 uv = gl_PointCoord - 0.5;
   float d = length(uv);
   if (d > 0.5) discard;
-  float core = smoothstep(0.5, 0.0, d);
+  float core = radialMask(d);
   float glow = pow(core, 2.35);
   vec3 col = mix(uAccent, vec3(1.0), pow(core, 7.0) * vMix);
   gl_FragColor = vec4(col, glow * vAlpha * uOpacity);

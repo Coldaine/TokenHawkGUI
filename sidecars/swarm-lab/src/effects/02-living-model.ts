@@ -16,6 +16,17 @@ import { PALETTE } from '../engine/palette'
 import type { EffectDefinition, EffectRuntime } from '../engine/types'
 
 const COUNT = 32000
+const CORE_SIZE = 3.6
+const CORE_PULSE = 0.1
+
+/**
+ * Glow radius at a moment in the breath cycle. The pulse is a modulation of the
+ * intended core size, not a replacement for it: the sprite's own scale was
+ * being overwritten with ~1, shrinking the hot core to a third of its size.
+ */
+export function coreScale(elapsed: number): number {
+  return CORE_SIZE * (1 + Math.sin(elapsed * 0.95) * CORE_PULSE)
+}
 
 const VERTEX = /* glsl */ `
 ${PARTICLE_HEADER}
@@ -76,7 +87,7 @@ export const effect: EffectDefinition = {
     const scene = new THREE.Scene()
     scene.add(points)
 
-    const core = softOrb(PALETTE.magenta, 3.6, 0.95)
+    const core = softOrb(PALETTE.magenta, CORE_SIZE, 0.95)
     scene.add(core)
 
     const camera = makeCamera(9)
@@ -97,8 +108,7 @@ export const effect: EffectDefinition = {
         camera.position.z = 9 + Math.cos(t * 0.4) * 0.6
         camera.lookAt(0, 0, 0)
 
-        const pulse = Math.sin(elapsed * 0.95) * 0.1
-        core.scale.setScalar(0.94 + pulse)
+        core.scale.setScalar(coreScale(elapsed))
       },
       resize(width, height) {
         applyViewport(camera, uniforms, ctx.pixelRatio, width, height)

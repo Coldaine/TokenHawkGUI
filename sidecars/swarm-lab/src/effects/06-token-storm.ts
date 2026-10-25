@@ -12,11 +12,15 @@ import {
   wireMesh,
   NOISE_GLSL,
   PARTICLE_HEADER,
+  RADIAL_MASK_GLSL,
 } from '../engine/particles'
 import { PALETTE } from '../engine/palette'
 import type { EffectDefinition, EffectRuntime } from '../engine/types'
 
 const COUNT = 40000
+/** Camera parallax, kept low here: the storm is dense and reads as slosh at higher gains. */
+const PARALLAX_X = 0.06
+const PARALLAX_Y = 0.035
 
 const VERTEX = /* glsl */ `
 ${PARTICLE_HEADER}
@@ -33,7 +37,8 @@ void main() {
   p.xz = mat2(c, -s, s, c) * p.xz;
 
   // Cursor influence is deliberately tiny; the eased uniform arrives already smoothed.
-  p.xy += uPointer * (0.3 + aSeed.z * 0.35);
+  // Kept far below the other worlds so forty thousand points do not drag as one sheet.
+  p.xy += uPointer * (0.07 + aSeed.z * 0.08);
   p.y += sin(uTime * 0.55 + aSeed.w * 6.2831) * 0.28;
 
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
@@ -47,6 +52,7 @@ void main() {
 `
 
 const FRAGMENT = /* glsl */ `
+${RADIAL_MASK_GLSL}
 uniform vec3 uAccent;
 uniform vec3 uEmber;
 uniform float uOpacity;
@@ -57,7 +63,7 @@ void main() {
   vec2 uv = gl_PointCoord - 0.5;
   float d = length(uv);
   if (d > 0.5) discard;
-  float core = smoothstep(0.5, 0.0, d);
+  float core = radialMask(d);
   float glow = pow(core, 2.15);
   vec3 col = mix(uEmber, uAccent, vMix);
   col = mix(col, vec3(1.0), pow(core, 6.0) * 0.85);
@@ -160,8 +166,8 @@ export const effect: EffectDefinition = {
         })
 
         const sway = elapsed * 0.05
-        camera.position.x = Math.sin(sway) * 1.15 + pointer.x * 0.22
-        camera.position.y = 0.35 + Math.cos(sway * 0.8) * 0.32 - pointer.y * 0.12
+        camera.position.x = Math.sin(sway) * 1.15 + pointer.x * PARALLAX_X
+        camera.position.y = 0.35 + Math.cos(sway * 0.8) * 0.32 - pointer.y * PARALLAX_Y
         camera.position.z = 10.2 - Math.cos(sway * 0.6) * 0.4
         camera.lookAt(0, 0.1, 0)
       },
