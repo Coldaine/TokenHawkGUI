@@ -92,6 +92,11 @@ describe('parseStoredSubscriptions', () => {
     expect(parseStoredSubscriptions(JSON.stringify([sub()]))).toEqual([sub()]);
   });
 
+  test('accepts remaining above totalAllowance (the modal permits it)', () => {
+    const over = [sub({ totalAllowance: 10, remaining: 25 })];
+    expect(parseStoredSubscriptions(JSON.stringify(over))).toEqual(over);
+  });
+
   test('accepts a valid empty list and tolerates unknown extra keys', () => {
     expect(parseStoredSubscriptions('[]')).toEqual([]);
     expect(parseStoredSubscriptions(JSON.stringify([{ ...sub(), extra: 1 }]))).toHaveLength(1);
@@ -108,7 +113,7 @@ describe('parseStoredSubscriptions', () => {
     ['zero allowance', [sub({ totalAllowance: 0 })]],
     ['string allowance', [sub({ totalAllowance: '100' as never })]],
     ['negative remaining', [sub({ remaining: -1 })]],
-    ['remaining over allowance', [sub({ remaining: 101 })]],
+    ['negative remaining beyond allowance', [sub({ remaining: -101 })]],
     ['null remaining (NaN/Infinity serialize to null)', [{ ...sub(), remaining: null }]],
     ['fractional accentHex', [sub({ accentHex: 1.5 })]],
     ['out-of-range accentHex', [sub({ accentHex: 0x1000000 })]],
@@ -160,6 +165,22 @@ describe('loading', () => {
     expect(second.getSnapshot()).toEqual([]);
   });
 
+  test('over-allowance remaining saved via the public API restores without hiding the list', () => {
+    const first = setup();
+    first.store.subscribe(() => {});
+    first.store.upsert(sub({ id: 'over', totalAllowance: 100, remaining: 150 }));
+    first.store.updateRemaining('claude-pro', 9999); // allowance is 45
+    const second = createSubscriptionStore({ getWindow: () => first.win });
+    second.subscribe(() => {});
+    const restored = second.getSnapshot();
+    expect(restored).toEqual(first.store.getSnapshot());
+    expect(restored).not.toBe(DEFAULT_SUBSCRIPTIONS);
+    expect(restored.find((s) => s.id === 'over')?.remaining).toBe(150);
+    expect(restored.find((s) => s.id === 'claude-pro')?.remaining).toBe(9999);
+    expect(restored).toHaveLength(DEFAULT_SUBSCRIPTIONS.length + 1);
+    expect(first.win.localStorage.data.has(INVALID_BACKUP_KEY)).toBe(false);
+  });
+
   test('persisted edits restore after reload', () => {
     const first = setup();
     first.store.subscribe(() => {});
@@ -174,7 +195,7 @@ describe('loading', () => {
   for (const [name, raw] of [
     ['malformed JSON', '{oops'],
     ['non-array JSON', '{"a":1}'],
-    ['invalid record', JSON.stringify([sub({ remaining: 500 })])],
+    ['invalid record', JSON.stringify([sub({ remaining: -500 })])],
   ] as const) {
     test(`${name}: defaults in memory, stored value untouched, raw preserved in backup`, () => {
       const { win, store } = setup(raw);

@@ -32,9 +32,8 @@ export function isAISubscription(value: unknown): value is AISubscription {
   if (typeof r.category !== 'string' || !CATEGORIES.includes(r.category)) return false;
   if (typeof r.resetType !== 'string' || !RESET_TYPES.includes(r.resetType)) return false;
   if (!isFiniteNumber(r.totalAllowance) || r.totalAllowance <= 0) return false;
-  if (!isFiniteNumber(r.remaining) || r.remaining < 0 || r.remaining > r.totalAllowance) {
-    return false;
-  }
+  // remaining may exceed totalAllowance: the edit modal allows it (min=0, no max).
+  if (!isFiniteNumber(r.remaining) || r.remaining < 0) return false;
   if (!isFiniteNumber(r.accentHex) || !Number.isInteger(r.accentHex)) return false;
   if (r.accentHex < 0 || r.accentHex > 0xffffff) return false;
   if (r.officialUrl !== undefined && typeof r.officialUrl !== 'string') return false;
@@ -76,11 +75,15 @@ function getStorage(win: StoreWindow | undefined): Storage | null {
 
 /**
  * Persistence policy:
- * - Missing key: defaults, in memory only (nothing is written on load).
- * - Valid payload, including `[]`: restored as-is.
+ * - Missing key: defaults, in memory only (the main key is not written on load).
+ * - Valid payload, including `[]`: restored as-is. A record is valid when its
+ *   fields have the right types/enums, `totalAllowance` is finite and > 0, and
+ *   `remaining` is finite and >= 0. `remaining` may exceed `totalAllowance`
+ *   because the edit modal permits that; negative/non-finite values are rejected.
  * - Invalid payload (bad JSON, any invalid record, duplicate ids): rejected as a
- *   whole, defaults shown in memory only, the stored value is left untouched and
- *   copied once to INVALID_BACKUP_KEY. The user's next explicit edit overwrites
+ *   whole and defaults are shown in memory only. The main key is left unchanged;
+ *   the raw payload is copied once to INVALID_BACKUP_KEY (the only write made on
+ *   load, skipped if a backup exists). The user's next explicit edit overwrites
  *   the main key; the backup survives.
  * - Storage unavailable or write failure: edits continue in memory, and a later
  *   re-attach will not replace those unsaved edits with a stale read.
