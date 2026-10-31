@@ -1,0 +1,253 @@
+.focus {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.focus * {
+  pointer-events: auto;
+}
+
+.focus-head {
+  position: absolute;
+  top: 56px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px var(--pad);
+  border-bottom: 1px solid rgba(36, 31, 22, 0.55);
+  background: linear-gradient(to bottom, rgba(5, 5, 6, 0.62), transparent);
+}
+
+.focus-back {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+
+.focus-back:hover {
+  color: var(--bone);
+  border-color: #3a3325;
+}
+
+.focus-title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  text-align: center;
+  min-width: 0;
+}
+
+.focus-title .idx {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+.focus-title b {
+  font-family: var(--cond);
+  font-size: clamp(16px, 1.8vw, 22px);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bone);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.focus-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+.focus-meta b {
+  color: var(--accent, var(--amber));
+  font-weight: 500;
+}
+
+.focus-left {
+  position: absolute;
+  left: var(--pad);
+  bottom: 62px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: min(420px, 46vw);
+}
+
+.focus-eyebrow {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent, var(--amber));
+}
+
+.focus-blurb {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #a29b8c;
+}
+
+.focus-channels {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.focus-channels span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 7px;
+  border: 1px solid #2a251b;
+  background: rgba(8, 8, 10, 0.6);
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.focus-channels span::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent, var(--amber));
+  box-shadow: 0 0 8px var(--accent, var(--amber));
+  opacity: 0.8;
+}
+
+.focus-telemetry {
+  position: absolute;
+  right: calc(var(--pad) + 54px);
+  bottom: 62px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-align: right;
+}
+
+.focus-telemetry b {
+  color: var(--bone);
+  font-weight: 500;
+}
+
+.focus-telemetry .big {
+  font-family: var(--cond);
+  font-size: 30px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: var(--bone);
+}
+
+.focus-telemetry .big small {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--dim);
+  margin-left: 6px;
+}
+
+.focus-count {
+  position: absolute;
+  top: 56px;
+  right: 74px;
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.focus-count b {
+  color: var(--bone);
+  font-weight: 500;
+}
+
+.focus.is-paused .focus-telemetry .big {
+  color: var(--amber);
+}
+
+.focus-hintline {
+  position: absolute;
+  left: 50%;
+  bottom: 62px;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dim-2);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .focus-head {
+    flex-wrap: wrap;
+  }
+
+  .focus-title {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .focus-left {
+    bottom: 96px;
+    max-width: 68vw;
+  }
+
+  .focus-telemetry {
+    bottom: 96px;
+    right: var(--pad);
+  }
+
+  .focus-hintline {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .focus-blurb,
+  .focus-channels {
+    display: none;
+  }
+
+  .focus-left {
+    bottom: 60px;
+  }
+
+  .focus-telemetry {
+    display: none;
+  }
+}
