@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "bun test",
+    "test": "bun test lib",
     "clean": "next clean"
   },
   "dependencies": {
@@ -42,3 +42,4 @@
     "typescript": "5.9.3"
   }
 }
+
